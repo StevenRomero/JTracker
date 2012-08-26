@@ -25,7 +25,7 @@ public class UserDAOHibernateImpl extends DAO implements UserDAO{
     }
 
     @Override
-    public void createUser(User user) throws Exception {
+    public void createUser(User user){
 	
 	try {
 		begin();
@@ -43,7 +43,7 @@ public class UserDAOHibernateImpl extends DAO implements UserDAO{
     }
 
     @Override
-    public User getUser(String userName) throws Exception {
+    public User getUser(String userName) {
 
 	try {
 	    begin();
@@ -64,7 +64,7 @@ public class UserDAOHibernateImpl extends DAO implements UserDAO{
     }
 
     @Override
-    public void saveUser(User user) throws Exception {
+    public void saveUser(User user) {
 	
 	try {
 		begin();
@@ -80,7 +80,7 @@ public class UserDAOHibernateImpl extends DAO implements UserDAO{
     }
 
     @Override
-    public void deleteUser(User user) throws Exception {
+    public void deleteUser(User user) {
 	
 	try {
 		begin();

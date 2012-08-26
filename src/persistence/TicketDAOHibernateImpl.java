@@ -20,12 +20,13 @@ public class TicketDAOHibernateImpl extends DAO implements TicketDAO {
     }
     
     // Safe multi-threading
+    //singleton
     public static TicketDAOHibernateImpl getInstance(){
 	return ticketDAOHibernateImpl;
     }
 
     @Override
-    public void createTicket(Ticket ticket) throws Exception {
+    public void createTicket(Ticket ticket) {
 
 	try {
 	    begin();
@@ -42,7 +43,7 @@ public class TicketDAOHibernateImpl extends DAO implements TicketDAO {
     }
 
     @Override
-    public Ticket getTicket(String ticketName) throws Exception {
+    public Ticket getTicket(String ticketName) {
 	// TODO Auto-generated method stub
 	try {
 	    begin();
@@ -62,7 +63,7 @@ public class TicketDAOHibernateImpl extends DAO implements TicketDAO {
     }
 
     @Override
-    public void saveTicket(Ticket ticket) throws Exception {
+    public void saveTicket(Ticket ticket) {
 
 	try {
 	    begin();
@@ -78,7 +79,7 @@ public class TicketDAOHibernateImpl extends DAO implements TicketDAO {
     }
 
     @Override
-    public void deleteTicket(Ticket ticket) throws Exception {
+    public void deleteTicket(Ticket ticket) {
 
 	try {
 	    begin();
@@ -95,12 +96,12 @@ public class TicketDAOHibernateImpl extends DAO implements TicketDAO {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Ticket> getAllTickets() throws Exception {
+    public List<Ticket> getAllTickets(){
 
 	try {
 	    Query q = getSession().createQuery("from Ticket");
-	    List<Ticket> list = q.list();
-	    return list;
+	    List<Ticket> ticketList = q.list();
+	    return ticketList;
 	} catch (HibernateException e) {	 
 	    appLogger.error(e);
 	    return null;
@@ -108,6 +109,50 @@ public class TicketDAOHibernateImpl extends DAO implements TicketDAO {
 	    close();
 	}
 	
+    }
+
+    @Override
+    public Ticket getFullTicket(String ticketName) {
+	try {
+	    begin();
+	    // will need to do join, fix query... 
+	    Query query = getSession().createQuery("from Ticket where ticketName = :ticketname");
+            query.setString("ticketname", ticketName);
+	    Ticket returnedTicket = (Ticket)query.uniqueResult();
+	    //deals with lazy initialization
+	    returnedTicket.getRelatedTickets().getRelatedTicketsList();
+	    returnedTicket.getAssignedTeams().getAssignedTeamsList();
+	    returnedTicket.getAssignedPersonnel().getAssignedPersonnelList();
+	    commit();
+	    return returnedTicket;
+	} catch (HibernateException e) {
+	    rollback();
+	    appLogger.error(e);
+	    return null;
+	}finally{
+	    close();
+	}
+    }
+
+    @Override
+    public List<Ticket> getAllFullTickets() {
+	try {
+	    Query q = getSession().createQuery("from Ticket");
+	    List<Ticket> ticketList = q.list();
+	    //Fix lazy initialization
+	    for(Ticket ticket: ticketList ){
+		
+		  ticket.getRelatedTickets().getRelatedTicketsList();
+		  ticket.getAssignedTeams().getAssignedTeamsList();
+		  ticket.getAssignedPersonnel().getAssignedPersonnelList();
+	    }
+	    return ticketList;
+	} catch (HibernateException e) {	 
+	    appLogger.error(e);
+	    return null;
+	}finally{
+	    close();
+	}
     }
 
 }
